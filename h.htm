@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدير براندات ميتا | Adam Amr</title>
+    <style>
+        :root {
+            --primary: #1877f2;
+            --secondary: #42b72a;
+            --bg: #f0f2f5;
+            --dark: #1c1e21;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        h3 { color: var(--dark); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-add { background: var(--secondary); color: white; }
+        .btn-add:hover { background: #36a420; }
+
+        .btn-meta { background: var(--primary); color: white; margin-bottom: 10px; }
+        .btn-meta:hover { background: #145dbf; }
+
+        #searchBox {
+            background: #fff;
+            border: 2px solid var(--primary);
+        }
+
+        .product-card {
+            background: #fafafa;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .product-card strong { color: var(--primary); font-size: 18px; }
+        .price-tag { color: var(--secondary); font-weight: bold; float: left; }
+        
+        .delete-btn {
+            background: #ff4d4d;
+            color: white;
+            width: auto;
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .main-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>نظام إدارة محتوى البراندات</h1>
+</div>
+
+<div class="main-container">
+    
+    <div class="card">
+        <h3>إضافة بيانات منتج</h3>
+        <input type="text" id="brandInput" placeholder="اسم البراند (مثلاً: Hawk)">
+        <input type="text" id="nameInput" placeholder="اسم المنتج">
+        <input type="number" id="priceInput" placeholder="السعر">
+        <textarea id="descInput" rows="3" placeholder="تفاصيل المنتج..."></textarea>
+        <button class="btn-add" onclick="addProduct()">حفظ المنتج</button>
+        
+        <hr>
+        
+        <h3>روابط سريعة لميتا</h3>
+        <button class="btn-meta" onclick="window.open('https://business.facebook.com/latest/inbox/', '_blank')">فتح Meta Business (حساب 1)</button>
+        <button class="btn-meta" onclick="window.open('https://business.facebook.com/latest/inbox/', '_blank')">فتح Meta Business (حساب 2)</button>
+        <p style="font-size: 12px; color: #666;">* نصيحة: استخدم متصفح "Ghost Browser" أو "Sidekick" لفتح كذا حساب في نفس اللحظة.</p>
+    </div>
+
+    <div class="card">
+        <h3>البحث عن المنتجات</h3>
+        <input type="text" id="searchBox" oninput="renderProducts()" placeholder="ابحث باسم البراند...">
+        
+        <div id="resultsList">
+            </div>
+    </div>
+
+</div>
+
+<script>
+    // جلب البيانات من LocalStorage عند تحميل الصفحة
+    let products = JSON.parse(localStorage.getItem('brand_data')) || [];
+
+    function addProduct() {
+        const brand = document.getElementById('brandInput').value.trim();
+        const name = document.getElementById('nameInput').value.trim();
+        const price = document.getElementById('priceInput').value.trim();
+        const desc = document.getElementById('descInput').value.trim();
+
+        if (brand && name && price) {
+            const newProduct = {
+                id: Date.now(),
+                brand: brand,
+                name: name,
+                price: price,
+                desc: desc
+            };
+
+            products.push(newProduct);
+            localStorage.setItem('brand_data', JSON.stringify(products));
+            
+            // مسح الخانات بعد الإضافة
+            document.getElementById('nameInput').value = '';
+            document.getElementById('priceInput').value = '';
+            document.getElementById('descInput').value = '';
+            
+            alert('تم حفظ المنتج بنجاح!');
+            renderProducts();
+        } else {
+            alert('من فضلك املأ البيانات الأساسية (البراند، المنتج، السعر)');
+        }
+    }
+
+    function renderProducts() {
+        const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+        const resultsList = document.getElementById('resultsList');
+        resultsList.innerHTML = '';
+
+        const filtered = products.filter(p => 
+            p.brand.toLowerCase().includes(searchTerm)
+        );
+
+        if (filtered.length === 0) {
+            resultsList.innerHTML = '<p style="text-align:center; color:#999;">لا توجد منتجات لهذا البراند.</p>';
+            return;
+        }
+
+        filtered.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'product-card';
+            div.innerHTML = `
+                <span class="price-tag">${p.price} EGP</span>
+                <strong>${p.name}</strong><br>
+                <small>البراند: ${p.brand}</small>
+                <p style="margin: 10px 0 0 0; font-size: 14px;">${p.desc}</p>
+                <button class="delete-btn" onclick="deleteProduct(${p.id})">حذف</button>
+            `;
+            resultsList.appendChild(div);
+        });
+    }
+
+    function deleteProduct(id) {
+        if(confirm('هل أنت متأكد من الحذف؟')) {
+            products = products.filter(p => p.id !== id);
+            localStorage.setItem('brand_data', JSON.stringify(products));
+            renderProducts();
+        }
+    }
+
+    // عرض المنتجات لأول مرة عند فتح الصفحة
+    renderProducts();
+</script>
+
+</body>
+</html>
