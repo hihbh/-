@@ -1,220 +1,285 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang='ar' dir='rtl'>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مدير براندات ميتا | Adam Amr</title>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>لوحة إدارة البراندات</title>
     <style>
-        :root {
-            --primary: #1877f2;
-            --secondary: #42b72a;
-            --bg: #f0f2f5;
-            --dark: #1c1e21;
-        }
+        :root { --primary: #1877f2; --success: #16a34a; --warning: #f59e0b; --danger: #ef4444; --bg: #f3f6fb; --card: #fff; --text: #1f2937; --muted: #6b7280 }
+        body.dark { --bg: #0f172a; --card: #111827; --text: #f3f4f6; --muted: #9ca3af }
+        * { box-sizing: border-box; transition: 0.2s; }
+        body { margin: 0; font-family: Segoe UI, Tahoma, sans-serif; background: var(--bg); color: var(--text) }
+        .container { max-width: 1200px; margin: auto; padding: 24px }
+        .header, .stat, .card { background: var(--card); border-radius: 20px; padding: 18px; box-shadow: 0 8px 24px rgba(0,0,0,.06) }
+        .header { display: flex; justify-content: space-between; align-items: center }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 20px 0 }
+        .main { display: grid; grid-template-columns: 1fr 1fr; gap: 20px }
+        input, textarea, select, button { width: 100%; padding: 12px; border-radius: 12px; margin: 8px 0; font-size: 14px; border: 1px solid #dbe2ea; background: var(--card); color: var(--text); }
+        button { border: none; cursor: pointer; font-weight: 700 }
+        .btn { background: var(--primary); color: #fff }
+        .btn-success { background: var(--success); color: #fff }
+        .btn-danger { background: var(--danger); color: #fff }
+        .row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .product, .brand { border: 1px solid #e5e7eb; padding: 14px; border-radius: 14px; margin-top: 10px; background: var(--card) }
+        .brand { border-right: 5px solid var(--primary); }
+        .badge { padding: 4px 10px; border-radius: 999px; color: #fff; font-size: 12px }
+        .available { background: var(--success) }
+        .out { background: var(--danger) }
+        .soon { background: var(--warning) }
+        .muted { color: var(--muted); font-size: 13px }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
+        #searchOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; z-index: 1000; padding: 20px; overflow-y: auto; }
+        .modal-content { max-width: 900px; margin: 40px auto; background: var(--bg); border-radius: 25px; padding: 25px; position: relative; }
+        .brand-chip { background: var(--primary); color: white; padding: 10px 18px; border-radius: 50px; cursor: pointer; display: inline-block; margin: 5px; font-weight: bold; }
+        .close-btn { position: absolute; left: 20px; top: 20px; background: var(--danger); color: white; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; border:none; }
 
-        .header {
-            width: 100%;
-            max-width: 1000px;
-            background: var(--primary);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .main-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            width: 100%;
-            max-width: 1000px;
-        }
-
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-        }
-
-        h3 { color: var(--dark); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
-
-        input, textarea {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        .btn-add { background: var(--secondary); color: white; }
-        .btn-add:hover { background: #36a420; }
-
-        .btn-meta { background: var(--primary); color: white; margin-bottom: 10px; }
-        .btn-meta:hover { background: #145dbf; }
-
-        #searchBox {
-            background: #fff;
-            border: 2px solid var(--primary);
-        }
-
-        .product-card {
-            background: #fafafa;
-            border: 1px solid #eee;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-            position: relative;
-        }
-
-        .product-card strong { color: var(--primary); font-size: 18px; }
-        .price-tag { color: var(--secondary); font-weight: bold; float: left; }
-        
-        .delete-btn {
-            background: #ff4d4d;
-            color: white;
-            width: auto;
-            padding: 5px 10px;
-            font-size: 12px;
-            margin-top: 10px;
-        }
-
-        @media (max-width: 768px) {
-            .main-container { grid-template-columns: 1fr; }
-        }
+        @media(max-width:900px) { .main { grid-template-columns: 1fr } }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>نظام إدارة محتوى البراندات</h1>
+<div id='loginScreen' style='position:fixed;inset:0;background:#020617;display:flex;align-items:center;justify-content:center;z-index:9999'>
+    <div style='background:white;padding:28px;border-radius:22px;width:90%;max-width:360px'>
+        <h2 style="color:#333">تسجيل الدخول</h2>
+        <input id='passwordLogin' type='password' placeholder='كلمة المرور'>
+        <button class='btn' onclick='loginSystem()'>دخول</button>
+        <div id='loginMsg' class='muted' style='color:red'></div>
+    </div>
 </div>
 
-<div class="main-container">
-    
-    <div class="card">
-        <h3>إضافة بيانات منتج</h3>
-        <input type="text" id="brandInput" placeholder="اسم البراند (مثلاً: Hawk)">
-        <input type="text" id="nameInput" placeholder="اسم المنتج">
-        <input type="number" id="priceInput" placeholder="السعر">
-        <textarea id="descInput" rows="3" placeholder="تفاصيل المنتج..."></textarea>
-        <button class="btn-add" onclick="addProduct()">حفظ المنتج</button>
-        
-        <hr>
-        
-        <h3>روابط سريعة لميتا</h3>
-        <button class="btn-meta" onclick="window.open('https://business.facebook.com/latest/inbox/', '_blank')">فتح Meta Business (حساب 1)</button>
-        <button class="btn-meta" onclick="window.open('https://business.facebook.com/latest/inbox/', '_blank')">فتح Meta Business (حساب 2)</button>
-        <p style="font-size: 12px; color: #666;">* نصيحة: استخدم متصفح "Ghost Browser" أو "Sidekick" لفتح كذا حساب في نفس اللحظة.</p>
+<div id="searchOverlay">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeSearch()">✕</button>
+        <h2 style="margin-top:0">🔍 االبحث بالبرندات</h2>
+        <div id="brandChips" style="margin-bottom: 20px;"></div>
+        <hr style="opacity: 0.2">
+        <input id="modalSearchBox" placeholder="ابحث عن منتج..." oninput="renderFilteredProducts()">
+        <div id="filteredProductsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;"></div>
+    </div>
+</div>
+
+<div class='container'>
+    <div class='header'>
+        <div>
+            <h2>Code Mark</h2>
+            <div class='muted'>إدارة براندات </div>
+        </div>
+        <div class='row'>
+            <button class='btn' onclick='toggleDarkMode()'>🌙</button>
+            <button class='btn' style="background: #8b5cf6;" onclick="openSearch()">🔍 البحث الذكي</button>
+        </div>
     </div>
 
-    <div class="card">
-        <h3>البحث عن المنتجات</h3>
-        <input type="text" id="searchBox" oninput="renderProducts()" placeholder="ابحث باسم البراند...">
-        
-        <div id="resultsList">
-            </div>
+    <div class='stats'>
+        <div class='stat'><h3 id='brandCount'>0</h3><div class='muted'>عدد البراندات</div></div>
+        <div class='stat'><h3 id='productCount'>0</h3><div class='muted'>عدد المنتجات</div></div>
     </div>
 
+    <div class='main'>
+        <div class='card'>
+            <h3>🔗 إضافة براند </h3>
+            <input id='metaBrand' placeholder='اسم البراند'>
+            <input id='metaLink' placeholder='رابط Meta'>
+            <button class='btn' onclick='saveBrand()'>حفظ البراند</button>
+            
+            <hr>
+
+            <h3>📦 إضافة / تعديل منتج</h3>
+            <label class="muted">اختر البراند:</label>
+            <select id='brandInput'></select>
+            <input id='nameInput' placeholder='اسم المنتج'>
+            <input id='priceInput' type='number' placeholder='السعر'>
+            <select id='statusInput'>
+                <option>متوفر</option>
+                <option>نفذ</option>
+                <option>قريبًا</option>
+            </select>
+            <textarea id='descInput' placeholder='الوصف'></textarea>
+            <button class='btn-success' onclick='saveProduct()'>حفظ المنتج</button>
+        </div>
+
+        <div class='card'>
+            <h3>براندات </h3>
+            <div id='brandsList'></div>
+            <hr>
+            <h3>آخر المنتجات</h3>
+            <div id='productsList'></div>
+        </div>
+    </div>
 </div>
 
 <script>
-    // جلب البيانات من LocalStorage عند تحميل الصفحة
-    let products = JSON.parse(localStorage.getItem('brand_data')) || [];
+    let products = JSON.parse(localStorage.getItem('products_v3')) || [];
+    let brands = JSON.parse(localStorage.getItem('brands_v3')) || [];
+    let editingId = null;
+    let selectedBrandForSearch = null;
 
-    function addProduct() {
-        const brand = document.getElementById('brandInput').value.trim();
-        const name = document.getElementById('nameInput').value.trim();
-        const price = document.getElementById('priceInput').value.trim();
-        const desc = document.getElementById('descInput').value.trim();
+    if (!localStorage.getItem('system_password')) localStorage.setItem('system_password', '1234');
+    if (localStorage.getItem('dark_mode') === '1') document.body.classList.add('dark');
 
-        if (brand && name && price) {
-            const newProduct = {
-                id: Date.now(),
-                brand: brand,
-                name: name,
-                price: price,
-                desc: desc
-            };
-
-            products.push(newProduct);
-            localStorage.setItem('brand_data', JSON.stringify(products));
-            
-            // مسح الخانات بعد الإضافة
-            document.getElementById('nameInput').value = '';
-            document.getElementById('priceInput').value = '';
-            document.getElementById('descInput').value = '';
-            
-            alert('تم حفظ المنتج بنجاح!');
-            renderProducts();
-        } else {
-            alert('من فضلك املأ البيانات الأساسية (البراند، المنتج، السعر)');
-        }
+    function loginSystem() {
+        if (passwordLogin.value === localStorage.getItem('system_password')) loginScreen.style.display = 'none';
+        else loginMsg.textContent = 'كلمة المرور غير صحيحة';
     }
 
-    function renderProducts() {
-        const searchTerm = document.getElementById('searchBox').value.toLowerCase();
-        const resultsList = document.getElementById('resultsList');
-        resultsList.innerHTML = '';
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark');
+        localStorage.setItem('dark_mode', document.body.classList.contains('dark') ? '1' : '0');
+    }
 
-        const filtered = products.filter(p => 
-            p.brand.toLowerCase().includes(searchTerm)
-        );
+    function updateBrandSelect() {
+        const select = document.getElementById('brandInput');
+        select.innerHTML = brands.length > 0 
+            ? brands.map(b => `<option value="${b.name}">${b.name}</option>`).join('')
+            : '<option value="">لا توجد براندات مضافة</option>';
+    }
 
-        if (filtered.length === 0) {
-            resultsList.innerHTML = '<p style="text-align:center; color:#999;">لا توجد منتجات لهذا البراند.</p>';
-            return;
+    function saveBrand() {
+        const b = {
+            id: Date.now(),
+            name: metaBrand.value.trim(),
+            link: metaLink.value.trim()
+        };
+        if (!b.name || !b.link) return alert('أكمل بيانات البراند');
+        brands.push(b);
+        localStorage.setItem('brands_v3', JSON.stringify(brands));
+        metaBrand.value = metaLink.value = '';
+        renderAll();
+    }
+
+    function saveProduct() {
+        const p = {
+            brand: brandInput.value,
+            name: nameInput.value.trim(),
+            price: priceInput.value,
+            status: statusInput.value,
+            desc: descInput.value.trim()
+        };
+        if (!p.brand || !p.name || !p.price) return alert('أكمل بيانات المنتج');
+        
+        if (editingId) {
+            let i = products.findIndex(x => x.id === editingId);
+            products[i] = { ...products[i], ...p };
+            editingId = null;
+        } else {
+            products.push({ id: Date.now(), ...p });
         }
+        
+        localStorage.setItem('products_v3', JSON.stringify(products));
+        nameInput.value = priceInput.value = descInput.value = '';
+        renderAll();
+    }
 
-        filtered.forEach(p => {
-            const div = document.createElement('div');
-            div.className = 'product-card';
-            div.innerHTML = `
-                <span class="price-tag">${p.price} EGP</span>
-                <strong>${p.name}</strong><br>
-                <small>البراند: ${p.brand}</small>
-                <p style="margin: 10px 0 0 0; font-size: 14px;">${p.desc}</p>
-                <button class="delete-btn" onclick="deleteProduct(${p.id})">حذف</button>
-            `;
-            resultsList.appendChild(div);
+    function statusClass(s) { return s === 'متوفر' ? 'available' : s === 'نفذ' ? 'out' : 'soon' }
+
+    // البحث الذكي
+    function openSearch() {
+        document.getElementById('searchOverlay').style.display = 'block';
+        renderChips();
+    }
+
+    function closeSearch() {
+        document.getElementById('searchOverlay').style.display = 'none';
+        selectedBrandForSearch = null;
+        modalSearchBox.value = '';
+        filteredProductsList.innerHTML = '';
+    }
+
+    function renderChips() {
+        const allBrands = brands.map(b => b.name);
+        brandChips.innerHTML = allBrands.map(b => `<span class="brand-chip" onclick="selectBrand('${b}')">${b}</span>`).join('');
+    }
+
+    function selectBrand(brandName) {
+        selectedBrandForSearch = brandName;
+        renderFilteredProducts();
+    }
+
+    function renderFilteredProducts() {
+        let q = modalSearchBox.value.toLowerCase();
+        let filtered = products.filter(p => {
+            const matchBrand = selectedBrandForSearch ? p.brand === selectedBrandForSearch : true;
+            return matchBrand && (p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
         });
+        filteredProductsList.innerHTML = filtered.map(p => createProductHTML(p)).join('');
+    }
+
+    function createProductHTML(p) {
+        return `
+            <div class='product'>
+                <div class='row' style='justify-content:space-between'>
+                    <strong>${p.name}</strong>
+                    <span class='badge ${statusClass(p.status)}'>${p.status}</span>
+                </div>
+                <div class='muted'>البراند: ${p.brand} | السعر: ${p.price} جنيه</div>
+                <div style="font-size:13px; margin:5px 0;">${p.desc}</div>
+                <div class='row'>
+                    <button class='btn' onclick='copyProduct(${p.id})'>نسخ</button>
+                    <button class='btn-success' onclick='editProduct(${p.id})'>تعديل</button>
+                    <button class='btn-danger' onclick='deleteProduct(${p.id})'>حذف</button>
+                </div>
+            </div>`;
+    }
+
+    function editProduct(id) {
+        let p = products.find(x => x.id === id);
+        editingId = id;
+        brandInput.value = p.brand;
+        nameInput.value = p.name;
+        priceInput.value = p.price;
+        statusInput.value = p.status;
+        descInput.value = p.desc;
+        closeSearch();
+        window.scrollTo(0,0);
     }
 
     function deleteProduct(id) {
-        if(confirm('هل أنت متأكد من الحذف؟')) {
-            products = products.filter(p => p.id !== id);
-            localStorage.setItem('brand_data', JSON.stringify(products));
-            renderProducts();
+        if(confirm('حذف المنتج؟')){
+            products = products.filter(x => x.id !== id);
+            localStorage.setItem('products_v3', JSON.stringify(products));
+            renderAll();
+            renderFilteredProducts();
         }
     }
 
-    // عرض المنتجات لأول مرة عند فتح الصفحة
-    renderProducts();
-</script>
+    function deleteBrand(id) {
+        if(confirm('حذف البراند سيؤثر على اختيارك للمنتجات القادمة، هل أنت متأكد؟')){
+            brands = brands.filter(x => x.id !== id);
+            localStorage.setItem('brands_v3', JSON.stringify(brands));
+            renderAll();
+        }
+    }
 
+    function copyProduct(id) {
+        let p = products.find(x => x.id === id);
+        navigator.clipboard.writeText(`${p.name}\nالبراند: ${p.brand}\nالسعر: ${p.price}\nالحالة: ${p.status}\n${p.desc}`);
+        alert('تم النسخ');
+    }
+
+    function renderAll() {
+        updateBrandSelect();
+        
+        // عرض براندات Meta أولاً
+        brandsList.innerHTML = brands.map(b => `
+            <div class='brand'>
+                <div class='row' style="justify-content:space-between">
+                    <strong>${b.name}</strong>
+                </div>
+                <div class='row' style="margin-top:10px">
+                    <button class='btn' onclick="window.open('${b.link}','_blank')">فتح Meta</button>
+                    <button class='btn-danger' onclick='deleteBrand(${b.id})'>حذف</button>
+                </div>
+            </div>
+        `).join('');
+
+        // عرض المنتجات ثانياً
+        productsList.innerHTML = products.slice(-5).reverse().map(p => createProductHTML(p)).join('');
+        
+        brandCount.textContent = brands.length;
+        productCount.textContent = products.length;
+    }
+
+    renderAll();
+</script>
 </body>
 </html>
