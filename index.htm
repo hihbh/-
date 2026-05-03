@@ -3,283 +3,282 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>لوحة إدارة البراندات</title>
+    <title>Code Mark - Dashboard</title>
     <style>
-        :root { --primary: #1877f2; --success: #16a34a; --warning: #f59e0b; --danger: #ef4444; --bg: #f3f6fb; --card: #fff; --text: #1f2937; --muted: #6b7280 }
-        body.dark { --bg: #0f172a; --card: #111827; --text: #f3f4f6; --muted: #9ca3af }
-        * { box-sizing: border-box; transition: 0.2s; }
-        body { margin: 0; font-family: Segoe UI, Tahoma, sans-serif; background: var(--bg); color: var(--text) }
-        .container { max-width: 1200px; margin: auto; padding: 24px }
-        .header, .stat, .card { background: var(--card); border-radius: 20px; padding: 18px; box-shadow: 0 8px 24px rgba(0,0,0,.06) }
-        .header { display: flex; justify-content: space-between; align-items: center }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 20px 0 }
-        .main { display: grid; grid-template-columns: 1fr 1fr; gap: 20px }
-        input, textarea, select, button { width: 100%; padding: 12px; border-radius: 12px; margin: 8px 0; font-size: 14px; border: 1px solid #dbe2ea; background: var(--card); color: var(--text); }
-        button { border: none; cursor: pointer; font-weight: 700 }
-        .btn { background: var(--primary); color: #fff }
-        .btn-success { background: var(--success); color: #fff }
-        .btn-danger { background: var(--danger); color: #fff }
-        .row { display: flex; gap: 8px; flex-wrap: wrap; }
-        .product, .brand { border: 1px solid #e5e7eb; padding: 14px; border-radius: 14px; margin-top: 10px; background: var(--card) }
-        .brand { border-right: 5px solid var(--primary); }
-        .badge { padding: 4px 10px; border-radius: 999px; color: #fff; font-size: 12px }
-        .available { background: var(--success) }
-        .out { background: var(--danger) }
-        .soon { background: var(--warning) }
-        .muted { color: var(--muted); font-size: 13px }
+        :root { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --primary: #2563eb; --border: #e2e8f0; --danger: #f43f5e; --success: #10b981; --meta: #1877f2; }
+        body.dark { --bg: #020617; --card: #1e293b; --text: #f8fafc; --border: #334155; }
+        
+        * { box-sizing: border-box; transition: 0.3s; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text); direction: rtl; min-height: 100vh; }
 
-        #searchOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; z-index: 1000; padding: 20px; overflow-y: auto; }
-        .modal-content { max-width: 900px; margin: 40px auto; background: var(--bg); border-radius: 25px; padding: 25px; position: relative; }
-        .brand-chip { background: var(--primary); color: white; padding: 10px 18px; border-radius: 50px; cursor: pointer; display: inline-block; margin: 5px; font-weight: bold; }
-        .close-btn { position: absolute; left: 20px; top: 20px; background: var(--danger); color: white; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; border:none; }
+        /* شاشة الدخول */
+        #loginOverlay { position: fixed; inset: 0; background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 10000; }
+        .login-box { background: white; padding: 40px; border-radius: 24px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        
+        .container { max-width: 1200px; margin: auto; padding: 20px; display: none; }
 
-        @media(max-width:900px) { .main { grid-template-columns: 1fr } }
+        /* البار العلوي والأزرار */
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px 25px; border-radius: 24px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+        .btn-nav { width: auto; height: 45px; padding: 0 20px; border-radius: 14px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .btn-nav:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); filter: brightness(1.1); }
+        .btn-nav:active { transform: translateY(0); }
+
+        /* القائمة المنسدلة للبراندات */
+        .dropdown-container { position: relative; }
+        #brandsDropdown { position: absolute; top: 55px; right: 0; background: var(--card); border: 1px solid var(--border); border-radius: 18px; width: 300px; display: none; z-index: 500; box-shadow: 0 20px 30px rgba(0,0,0,0.15); padding: 12px; }
+        .brand-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 12px; margin-bottom: 5px; background: rgba(0,0,0,0.02); }
+        .brand-item:hover { background: rgba(0,0,0,0.05); }
+        .link-meta { background: var(--meta); color: white; padding: 6px 14px; border-radius: 10px; font-size: 11px; text-decoration: none; font-weight: bold; }
+        .no-link { font-size: 10px; color: #94a3b8; }
+
+        /* الكروت والمنتجات */
+        .card { background: var(--card); padding: 25px; border-radius: 24px; border: 1px solid var(--border); margin-bottom: 25px; }
+        input, select, textarea { width: 100%; padding: 14px; margin: 8px 0; border-radius: 14px; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; }
+        
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .p-card { background: var(--card); border-radius: 24px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .p-header { padding: 20px; border-bottom: 1px solid var(--border); background: linear-gradient(to left, rgba(37,99,235,0.05), transparent); }
+        .p-body { padding: 20px; }
+        .p-price { font-size: 26px; font-weight: 900; color: var(--primary); margin: 10px 0; }
+        .p-tag { padding: 5px 12px; border-radius: 12px; font-size: 11px; color: white; font-weight: 800; text-transform: uppercase; }
+
+        /* المودالات */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); }
+        .modal { background: var(--card); width: 100%; max-width: 500px; padding: 30px; border-radius: 28px; position: relative; max-height: 80vh; overflow-y: auto; }
+        
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<div id='loginScreen' style='position:fixed;inset:0;background:#020617;display:flex;align-items:center;justify-content:center;z-index:9999'>
-    <div style='background:white;padding:28px;border-radius:22px;width:90%;max-width:360px'>
-        <h2 style="color:#333">تسجيل الدخول</h2>
-        <input id='passwordLogin' type='password' placeholder='كلمة المرور'>
-        <button class='btn' onclick='loginSystem()'>دخول</button>
-        <div id='loginMsg' class='muted' style='color:red'></div>
+<div id="loginOverlay">
+    <div class="login-box">
+        <h1 style="color: #1e293b; margin-bottom: 10px;">Code Mark</h1>
+        <p style="color: #64748b; margin-bottom: 25px;">نظام إدارة المخزون الاحترافي</p>
+        <input type="password" id="passInput" placeholder="أدخل كلمة المرور">
+        <div id="brandNameDiv" class="hidden"><input id="bNameInput" placeholder="اسم البراند الخاص بك"></div>
+        <button style="background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 14px; font-weight: bold; cursor: pointer;" onclick="handleLogin()">دخول للنظام</button>
     </div>
 </div>
 
-<div id="searchOverlay">
-    <div class="modal-content">
-        <button class="close-btn" onclick="closeSearch()">✕</button>
-        <h2 style="margin-top:0">🔍 االبحث بالبرندات</h2>
-        <div id="brandChips" style="margin-bottom: 20px;"></div>
-        <hr style="opacity: 0.2">
-        <input id="modalSearchBox" placeholder="ابحث عن منتج..." oninput="renderFilteredProducts()">
-        <div id="filteredProductsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;"></div>
+<div class="container" id="app">
+    <div class="nav-bar">
+        <div style="display: flex; flex-direction: column;">
+            <h2 id="userHello" style="margin:0">مرحباً</h2>
+            <small id="roleSubtitle" style="color: var(--primary); font-weight: bold;"></small>
+        </div>
+        
+        <div class="nav-actions">
+            <div class="dropdown-container">
+                <button id="adminBrandsBtn" class="btn-nav hidden" style="background: var(--success);" onclick="toggleBrandsDropdown()">🏷️ البراندات</button>
+                <div id="brandsDropdown"></div>
+            </div>
+
+            <button id="searchBtn" class="btn-nav" style="background: var(--primary);" onclick="openOverlay('searchMod')">🔍 البحث</button>
+            <button id="deleteMgrBtn" class="btn-nav hidden" style="background: var(--danger);" onclick="openOverlay('deleteMod')">🗑️ مسح</button>
+            <button class="btn-nav" style="background: #64748b;" onclick="toggleDark()">🌓</button>
+            <button class="btn-nav" style="background: #1e293b;" onclick="location.reload()">🚪</button>
+        </div>
+    </div>
+
+    <div id="adminArea" class="card hidden">
+        <h3 style="margin-top:0">🔗 إدارة روابط Meta للبراندات</h3>
+        <div style="display:flex; gap:10px">
+            <select id="selectBrandMeta" style="flex:1"></select>
+            <input id="metaLinkInput" placeholder="رابط Facebook / Instagram" style="flex:2">
+            <button class="btn-nav" style="background: var(--primary); width: auto;" onclick="linkMeta()">حفظ الرابط</button>
+        </div>
+    </div>
+
+    <div id="brandArea" class="card hidden">
+        <h3 id="formTitle" style="margin-top:0">📦 إضافة منتج جديد</h3>
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:15px">
+            <input id="pName" placeholder="اسم المنتج">
+            <input id="pPrice" type="number" placeholder="السعر">
+        </div>
+        <textarea id="pDesc" placeholder="اكتب تفاصيل المنتج هنا..." rows="2"></textarea>
+        <select id="pStatus"><option>متوفر</option><option>نفذ</option></select>
+        <button id="saveBtn" style="background: var(--primary); color: white; border: none; padding: 15px; border-radius: 14px; font-weight: bold; cursor: pointer;" onclick="saveProduct()">حفظ ونشر المنتج</button>
+    </div>
+
+    <div class="product-grid" id="mainGrid"></div>
+</div>
+
+<div id="deleteMod" class="overlay">
+    <div class="modal">
+        <h3>🗑️ حذف البراندات</h3>
+        <div id="brandsListDel"></div>
+        <button class="btn-nav" style="background:#eee; color:#333; width:100%; margin-top:20px" onclick="closeOverlay()">إغلاق</button>
     </div>
 </div>
 
-<div class='container'>
-    <div class='header'>
-        <div>
-            <h2>Code Mark</h2>
-            <div class='muted'>إدارة براندات </div>
-        </div>
-        <div class='row'>
-            <button class='btn' onclick='toggleDarkMode()'>🌙</button>
-            <button class='btn' style="background: #8b5cf6;" onclick="openSearch()">🔍 البحث الذكي</button>
-        </div>
-    </div>
-
-    <div class='stats'>
-        <div class='stat'><h3 id='brandCount'>0</h3><div class='muted'>عدد البراندات</div></div>
-        <div class='stat'><h3 id='productCount'>0</h3><div class='muted'>عدد المنتجات</div></div>
-    </div>
-
-    <div class='main'>
-        <div class='card'>
-            <h3>🔗 إضافة براند </h3>
-            <input id='metaBrand' placeholder='اسم البراند'>
-            <input id='metaLink' placeholder='رابط Meta'>
-            <button class='btn' onclick='saveBrand()'>حفظ البراند</button>
-            
-            <hr>
-
-            <h3>📦 إضافة / تعديل منتج</h3>
-            <label class="muted">اختر البراند:</label>
-            <select id='brandInput'></select>
-            <input id='nameInput' placeholder='اسم المنتج'>
-            <input id='priceInput' type='number' placeholder='السعر'>
-            <select id='statusInput'>
-                <option>متوفر</option>
-                <option>نفذ</option>
-                <option>قريبًا</option>
-            </select>
-            <textarea id='descInput' placeholder='الوصف'></textarea>
-            <button class='btn-success' onclick='saveProduct()'>حفظ المنتج</button>
-        </div>
-
-        <div class='card'>
-            <h3>براندات </h3>
-            <div id='brandsList'></div>
-            <hr>
-            <h3>آخر المنتجات</h3>
-            <div id='productsList'></div>
-        </div>
+<div id="searchMod" class="overlay">
+    <div class="modal">
+        <h3>🔍 البحث عن براند</h3>
+        <div id="brandsListSearch" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px"></div>
+        <div id="searchRes"></div>
+        <button class="btn-nav" style="background:#eee; color:#333; width:100%; margin-top:20px" onclick="closeOverlay()">إغلاق</button>
     </div>
 </div>
 
 <script>
-    let products = JSON.parse(localStorage.getItem('products_v3')) || [];
-    let brands = JSON.parse(localStorage.getItem('brands_v3')) || [];
-    let editingId = null;
-    let selectedBrandForSearch = null;
+    let db = JSON.parse(localStorage.getItem('cm_v7_db')) || { brands: [], products: [] };
+    let session = { role: '', name: '' };
+    let editId = null;
 
-    if (!localStorage.getItem('system_password')) localStorage.setItem('system_password', '1234');
-    if (localStorage.getItem('dark_mode') === '1') document.body.classList.add('dark');
+    // تفعيل إظهار حقل البراند عند كتابة باسورد 11
+    passInput.oninput = () => brandNameDiv.classList.toggle('hidden', passInput.value !== '11');
 
-    function loginSystem() {
-        if (passwordLogin.value === localStorage.getItem('system_password')) loginScreen.style.display = 'none';
-        else loginMsg.textContent = 'كلمة المرور غير صحيحة';
+    function handleLogin() {
+        const pass = passInput.value;
+        if (pass === '11') {
+            const name = bNameInput.value;
+            if(!name) return alert('يرجى كتابة اسم البراند');
+            session = { role: 'brand', name: name };
+            if(!db.brands.find(b => b.name === name)) { db.brands.push({name, meta: ''}); save(); }
+            brandArea.classList.remove('hidden');
+            searchBtn.classList.add('hidden'); 
+        } else if (pass === '67') {
+            session = { role: 'admin', name: 'المدير' };
+            adminArea.classList.remove('hidden');
+            adminBrandsBtn.classList.remove('hidden');
+            deleteMgrBtn.classList.remove('hidden');
+        } else return alert('كلمة مرور خاطئة');
+
+        loginOverlay.style.display = 'none';
+        app.style.display = 'block';
+        userHello.textContent = `مرحباً، ${session.name}`;
+        roleSubtitle.textContent = session.role === 'admin' ? 'لوحة تحكم المدير' : 'لوحة إدارة المنتجات';
+        render();
     }
 
-    function toggleDarkMode() {
-        document.body.classList.toggle('dark');
-        localStorage.setItem('dark_mode', document.body.classList.contains('dark') ? '1' : '0');
+    function toggleBrandsDropdown() {
+        const dd = document.getElementById('brandsDropdown');
+        const isVisible = dd.style.display === 'block';
+        dd.style.display = isVisible ? 'none' : 'block';
+        
+        if(!isVisible) {
+            dd.innerHTML = db.brands.length ? db.brands.map(b => `
+                <div class="brand-item">
+                    <strong>${b.name}</strong>
+                    ${b.meta ? `<a href="${b.meta}" target="_blank" class="link-meta">Meta</a>` : `<span class="no-link">لا يوجد لينك</span>`}
+                </div>
+            `).join('') : '<p style="text-align:center; font-size:12px; color:#999;">لا توجد براندات مسجلة</p>';
+        }
     }
 
-    function updateBrandSelect() {
-        const select = document.getElementById('brandInput');
-        select.innerHTML = brands.length > 0 
-            ? brands.map(b => `<option value="${b.name}">${b.name}</option>`).join('')
-            : '<option value="">لا توجد براندات مضافة</option>';
-    }
-
-    function saveBrand() {
-        const b = {
-            id: Date.now(),
-            name: metaBrand.value.trim(),
-            link: metaLink.value.trim()
-        };
-        if (!b.name || !b.link) return alert('أكمل بيانات البراند');
-        brands.push(b);
-        localStorage.setItem('brands_v3', JSON.stringify(brands));
-        metaBrand.value = metaLink.value = '';
-        renderAll();
+    // إغلاق الدروب داون عند الضغط في أي مكان آخر
+    window.onclick = (e) => {
+        if (!e.target.matches('#adminBrandsBtn')) {
+            document.getElementById('brandsDropdown').style.display = 'none';
+        }
     }
 
     function saveProduct() {
         const p = {
-            brand: brandInput.value,
-            name: nameInput.value.trim(),
-            price: priceInput.value,
-            status: statusInput.value,
-            desc: descInput.value.trim()
+            id: editId || Date.now(),
+            brand: session.name,
+            name: pName.value,
+            price: pPrice.value,
+            desc: pDesc.value,
+            status: pStatus.value
         };
-        if (!p.brand || !p.name || !p.price) return alert('أكمل بيانات المنتج');
-        
-        if (editingId) {
-            let i = products.findIndex(x => x.id === editingId);
-            products[i] = { ...products[i], ...p };
-            editingId = null;
-        } else {
-            products.push({ id: Date.now(), ...p });
-        }
-        
-        localStorage.setItem('products_v3', JSON.stringify(products));
-        nameInput.value = priceInput.value = descInput.value = '';
-        renderAll();
+        if(!p.name || !p.price) return alert('يرجى ملء الاسم والسعر');
+        if(editId) {
+            const i = db.products.findIndex(x => x.id === editId);
+            db.products[i] = p;
+            editId = null;
+        } else { db.products.push(p); }
+        save(); resetForm(); render();
     }
 
-    function statusClass(s) { return s === 'متوفر' ? 'available' : s === 'نفذ' ? 'out' : 'soon' }
-
-    // البحث الذكي
-    function openSearch() {
-        document.getElementById('searchOverlay').style.display = 'block';
-        renderChips();
+    function resetForm() {
+        pName.value = pPrice.value = pDesc.value = '';
+        saveBtn.textContent = 'حفظ ونشر المنتج';
+        formTitle.textContent = '📦 إضافة منتج جديد';
     }
 
-    function closeSearch() {
-        document.getElementById('searchOverlay').style.display = 'none';
-        selectedBrandForSearch = null;
-        modalSearchBox.value = '';
-        filteredProductsList.innerHTML = '';
+    function linkMeta() {
+        const b = db.brands.find(x => x.name === selectBrandMeta.value);
+        if(b) b.meta = metaLinkInput.value;
+        save(); render(); alert('تم ربط الرابط بالبراند بنجاح');
     }
 
-    function renderChips() {
-        const allBrands = brands.map(b => b.name);
-        brandChips.innerHTML = allBrands.map(b => `<span class="brand-chip" onclick="selectBrand('${b}')">${b}</span>`).join('');
-    }
-
-    function selectBrand(brandName) {
-        selectedBrandForSearch = brandName;
-        renderFilteredProducts();
-    }
-
-    function renderFilteredProducts() {
-        let q = modalSearchBox.value.toLowerCase();
-        let filtered = products.filter(p => {
-            const matchBrand = selectedBrandForSearch ? p.brand === selectedBrandForSearch : true;
-            return matchBrand && (p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
-        });
-        filteredProductsList.innerHTML = filtered.map(p => createProductHTML(p)).join('');
-    }
-
-    function createProductHTML(p) {
-        return `
-            <div class='product'>
-                <div class='row' style='justify-content:space-between'>
-                    <strong>${p.name}</strong>
-                    <span class='badge ${statusClass(p.status)}'>${p.status}</span>
-                </div>
-                <div class='muted'>البراند: ${p.brand} | السعر: ${p.price} جنيه</div>
-                <div style="font-size:13px; margin:5px 0;">${p.desc}</div>
-                <div class='row'>
-                    <button class='btn' onclick='copyProduct(${p.id})'>نسخ</button>
-                    <button class='btn-success' onclick='editProduct(${p.id})'>تعديل</button>
-                    <button class='btn-danger' onclick='deleteProduct(${p.id})'>حذف</button>
-                </div>
-            </div>`;
-    }
-
-    function editProduct(id) {
-        let p = products.find(x => x.id === id);
-        editingId = id;
-        brandInput.value = p.brand;
-        nameInput.value = p.name;
-        priceInput.value = p.price;
-        statusInput.value = p.status;
-        descInput.value = p.desc;
-        closeSearch();
-        window.scrollTo(0,0);
-    }
-
-    function deleteProduct(id) {
-        if(confirm('حذف المنتج؟')){
-            products = products.filter(x => x.id !== id);
-            localStorage.setItem('products_v3', JSON.stringify(products));
-            renderAll();
-            renderFilteredProducts();
-        }
-    }
-
-    function deleteBrand(id) {
-        if(confirm('حذف البراند سيؤثر على اختيارك للمنتجات القادمة، هل أنت متأكد؟')){
-            brands = brands.filter(x => x.id !== id);
-            localStorage.setItem('brands_v3', JSON.stringify(brands));
-            renderAll();
-        }
-    }
-
-    function copyProduct(id) {
-        let p = products.find(x => x.id === id);
-        navigator.clipboard.writeText(`${p.name}\nالبراند: ${p.brand}\nالسعر: ${p.price}\nالحالة: ${p.status}\n${p.desc}`);
-        alert('تم النسخ');
-    }
-
-    function renderAll() {
-        updateBrandSelect();
-        
-        // عرض براندات Meta أولاً
-        brandsList.innerHTML = brands.map(b => `
-            <div class='brand'>
-                <div class='row' style="justify-content:space-between">
+    function render() {
+        if(session.role === 'admin') {
+            selectBrandMeta.innerHTML = db.brands.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
+            brandsListDel.innerHTML = db.brands.map(b => `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(0,0,0,0.02); border-radius:12px; margin-bottom:8px;">
                     <strong>${b.name}</strong>
+                    <button onclick="deleteBrand('${b.name}')" style="background:var(--danger); color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;">مسح X</button>
                 </div>
-                <div class='row' style="margin-top:10px">
-                    <button class='btn' onclick="window.open('${b.link}','_blank')">فتح Meta</button>
-                    <button class='btn-danger' onclick='deleteBrand(${b.id})'>حذف</button>
+            `).join('');
+        }
+
+        const grid = document.getElementById('mainGrid');
+        let list = (session.role === 'brand') ? db.products.filter(p => p.brand === session.name) : db.products;
+        
+        grid.innerHTML = list.slice().reverse().map(p => `
+            <div class="p-card">
+                <div class="p-header">
+                    <div style="display:flex; justify-content:space-between; align-items:start">
+                        <span class="p-tag" style="background:${p.status === 'متوفر' ? 'var(--success)' : 'var(--danger)'}">${p.status}</span>
+                        <span style="font-size:11px; color:var(--primary); font-weight:bold">${p.brand}</span>
+                    </div>
+                    <h3 style="margin:12px 0 0 0; font-size:18px;">${p.name}</h3>
+                </div>
+                <div class="p-body">
+                    <div class="p-price">${p.price} ج.م</div>
+                    <p style="font-size:13px; opacity:0.7; margin:10px 0; min-height:40px;">${p.desc}</p>
+                    ${session.role ? `
+                    <div style="display:flex; gap:8px; margin-top:15px; border-top:1px solid var(--border); padding-top:15px">
+                        <button onclick="startEdit(${p.id})" style="flex:1; background:var(--success); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer; font-weight:bold">تعديل</button>
+                        <button onclick="delP(${p.id})" style="flex:1; background:var(--danger); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer; font-weight:bold">حذف</button>
+                    </div>` : ''}
                 </div>
             </div>
         `).join('');
-
-        // عرض المنتجات ثانياً
-        productsList.innerHTML = products.slice(-5).reverse().map(p => createProductHTML(p)).join('');
-        
-        brandCount.textContent = brands.length;
-        productCount.textContent = products.length;
     }
 
-    renderAll();
+    function viewBrand(name) {
+        const b = db.brands.find(x => x.name === name);
+        const ps = db.products.filter(p => p.brand === name);
+        searchRes.innerHTML = `
+            <div style="padding:15px; border:2px solid var(--primary); border-radius:20px; margin-top:15px">
+                <div style="display:flex; justify-content:space-between; align-items:center">
+                    <h3 style="margin:0">${name}</h3>
+                    ${b.meta ? `<a href="${b.meta}" target="_blank" class="link-meta" style="padding:8px 20px">فتح Meta</a>` : ''}
+                </div>
+                <p style="font-size:12px; margin:10px 0;">إجمالي المنتجات: ${ps.length}</p>
+                <div style="max-height:200px; overflow-y:auto; border-top:1px solid var(--border); padding-top:10px">
+                    ${ps.map(p => `<div style="font-size:13px; margin:5px 0; padding:8px; background:var(--bg); border-radius:8px"><strong>${p.name}</strong> - ${p.price} ج.م</div>`).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    function openOverlay(id) {
+        document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
+        document.getElementById(id).style.display = 'flex';
+        if(id === 'searchMod') {
+            brandsListSearch.innerHTML = db.brands.map(b => `<button onclick="viewBrand('${b.name}')" style="background:var(--bg); border:1px solid var(--primary); color:var(--primary); padding:8px 15px; border-radius:10px; font-weight:bold; cursor:pointer">${b.name}</button>`).join('');
+        }
+    }
+
+    function deleteBrand(name) { if(confirm(`هل تريد مسح براند ${name} وكل منتجاته؟`)) { db.brands = db.brands.filter(b => b.name !== name); db.products = db.products.filter(p => p.brand !== name); save(); render(); } }
+    function delP(id) { if(confirm('حذف المنتج؟')) { db.products = db.products.filter(x => x.id !== id); save(); render(); } }
+    function startEdit(id) {
+        const p = db.products.find(x => x.id === id);
+        editId = id; pName.value = p.name; pPrice.value = p.price; pDesc.value = p.desc; pStatus.value = p.status;
+        saveBtn.textContent = 'تحديث البيانات'; formTitle.textContent = '📝 تعديل المنتج'; window.scrollTo(0,0);
+    }
+    
 </script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script src="l.js"></script>
 </body>
 </html>
