@@ -166,7 +166,7 @@
             if(!db.brands.find(b => b.name === name)) { db.brands.push({name, meta: ''}); save(); }
             brandArea.classList.remove('hidden');
             searchBtn.classList.add('hidden'); 
-        } else if (pass === '67') {
+        } else if (pass === '6') {
             session = { role: 'admin', name: 'المدير' };
             adminArea.classList.remove('hidden');
             adminBrandsBtn.classList.remove('hidden');
