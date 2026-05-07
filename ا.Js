@@ -1,8 +1,8 @@
-// إعدادات Firebase الخاصة بتطبيقك
+// إعدادات Firebase من واقع الصور الخاصة بك
 const firebaseConfig = {
-  apiKey: "AIzaSyCi3kaK-cWafH8q4jgKBUcqqxtTnKrnC78",
+  apiKey: "AIzaSyCi3kaK-cwafM8q4jgKBUcqqxtTnKrnC78",
   authDomain: "code-mark-2eb98.firebaseapp.com",
-  // هذا الرابط ضروري جداً للمزامنة وهو موجود في صورة الـ Console التي أرفقتها
+  // الرابط ده هو اللي هيخلي البيانات تظهر في الـ Console عندك
   databaseURL: "https://code-mark-2eb98-default-rtdb.firebaseio.com", 
   projectId: "code-mark-2eb98",
   storageBucket: "code-mark-2eb98.firebasestorage.app",
@@ -11,7 +11,7 @@ const firebaseConfig = {
   measurementId: "G-J4M1MXTSWV"
 };
 
-// تهيئة Firebase بالنسخة المتوافقة مع السكريبتات في صفحتك (v8)
+// تهيئة Firebase
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
