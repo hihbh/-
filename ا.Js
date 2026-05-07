@@ -1,15 +1,8 @@
- // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  // إعدادات Firebase الخاصة بتطبيقك (تم أخذها من صورتك)
+// إعدادات Firebase الخاصة بتطبيقك
 const firebaseConfig = {
   apiKey: "AIzaSyCi3kaK-cwafM8q4jgKBUcqqxtTnKrnC78",
   authDomain: "code-mark-2eb98.firebaseapp.com",
+  databaseURL: "https://code-mark-2eb98-default-rtdb.firebaseio.com", // تأكد أن هذا الرابط صحيح من لوحة Firebase
   projectId: "code-mark-2eb98",
   storageBucket: "code-mark-2eb98.firebasestorage.app",
   messagingSenderId: "543549417748",
@@ -17,7 +10,9 @@ const firebaseConfig = {
   measurementId: "G-J4M1MXTSWV"
 };
 
-// تهيئة Firebase بالإصدار المتوافق مع الـ Scripts المستدعاة في صفحتك
+// تهيئة Firebase بالنسخة المتوافقة مع السكريبتات الموجودة في index.html
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
+} else {
+    firebase.app(); // إذا كان مهيأ مسبقاً
 }
