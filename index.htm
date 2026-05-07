@@ -130,7 +130,9 @@
     let session = { role: '', name: '' };
     let editId = null;
 
-    // المزامنة الحقيقية
+    // تشغيل المزامنة فور تحميل الصفحة لضمان استلام البيانات قبل الدخول حتى
+    window.onload = startSync;
+
     function startSync() {
         if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
             firebase.database().ref('cm_v7_db').on('value', (snapshot) => {
@@ -140,7 +142,10 @@
                     if (!db.brands) db.brands = [];
                     if (!db.products) db.products = [];
                     localStorage.setItem('cm_v7_db', JSON.stringify(db));
-                    if (app.style.display === 'block') render();
+                    // التحديث فقط إذا كان المستخدم تجاوز شاشة الدخول
+                    if (document.getElementById('app').style.display === 'block') {
+                        render();
+                    }
                 }
             });
         }
@@ -161,7 +166,10 @@
             const name = bNameInput.value;
             if(!name) return alert('يرجى كتابة اسم البراند');
             session = { role: 'brand', name: name };
-            if(!db.brands.find(b => b.name === name)) { db.brands.push({name, meta: ''}); save(); }
+            if(!db.brands.find(b => b.name === name)) { 
+                db.brands.push({name, meta: ''}); 
+                save(); 
+            }
             brandArea.classList.remove('hidden');
         } else if (pass === '67') {
             session = { role: 'admin', name: 'المدير' };
@@ -174,20 +182,28 @@
         app.style.display = 'block';
         userHello.textContent = `مرحباً، ${session.name}`;
         roleSubtitle.textContent = session.role === 'admin' ? 'لوحة تحكم المدير' : 'لوحة إدارة المنتجات';
-        startSync();
+        
+        // ريندر فوري بعد الدخول لعرض البيانات المحملة
         render();
     }
 
     function saveProduct() {
+        const pNameInput = document.getElementById('pName');
+        const pPriceInput = document.getElementById('pPrice');
+        const pDescInput = document.getElementById('pDesc');
+        const pStatusInput = document.getElementById('pStatus');
+
+        if(!pNameInput.value || !pPriceInput.value) return alert('يرجى ملء الاسم والسعر');
+
         const p = {
             id: editId || Date.now(),
             brand: session.name,
-            name: pName.value,
-            price: pPrice.value,
-            desc: pDesc.value,
-            status: pStatus.value
+            name: pNameInput.value,
+            price: pPriceInput.value,
+            desc: pDescInput.value,
+            status: pStatusInput.value
         };
-        if(!p.name || !p.price) return alert('يرجى ملء الاسم والسعر');
+
         if(editId) {
             const i = db.products.findIndex(x => x.id === editId);
             if(i !== -1) db.products[i] = p;
@@ -195,20 +211,25 @@
         } else { 
             db.products.push(p); 
         }
-        save(); resetForm(); render();
+        
+        save(); 
+        resetForm(); 
+        render();
         alert('تم الحفظ بنجاح');
     }
 
     function resetForm() {
-        pName.value = pPrice.value = pDesc.value = '';
-        saveBtn.textContent = 'حفظ ونشر المنتج';
-        formTitle.textContent = '📦 إضافة منتج جديد';
+        document.getElementById('pName').value = '';
+        document.getElementById('pPrice').value = '';
+        document.getElementById('pDesc').value = '';
+        document.getElementById('saveBtn').textContent = 'حفظ ونشر المنتج';
+        document.getElementById('formTitle').textContent = '📦 إضافة منتج جديد';
     }
 
     function render() {
         if(session.role === 'admin') {
-            selectBrandMeta.innerHTML = db.brands.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
-            brandsListDel.innerHTML = db.brands.map(b => `
+            document.getElementById('selectBrandMeta').innerHTML = db.brands.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
+            document.getElementById('brandsListDel').innerHTML = db.brands.map(b => `
                 <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(0,0,0,0.02); border-radius:12px; margin-bottom:8px;">
                     <strong>${b.name}</strong>
                     <button onclick="deleteBrand('${b.name}')" style="background:var(--danger); color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;">مسح X</button>
@@ -255,34 +276,44 @@
     }
 
     function linkMeta() {
-        const b = db.brands.find(x => x.name === selectBrandMeta.value);
-        if(b) b.meta = metaLinkInput.value;
+        const b = db.brands.find(x => x.name === document.getElementById('selectBrandMeta').value);
+        if(b) b.meta = document.getElementById('metaLinkInput').value;
         save(); render(); alert('تم الحفظ');
     }
 
     function deleteBrand(name) { if(confirm(`مسح ${name}؟`)) { db.brands = db.brands.filter(b => b.name !== name); db.products = db.products.filter(p => p.brand !== name); save(); render(); } }
     function delP(id) { if(confirm('حذف المنتج؟')) { db.products = db.products.filter(x => x.id !== id); save(); render(); } }
+    
     function startEdit(id) {
         const p = db.products.find(x => x.id === id);
-        editId = id; pName.value = p.name; pPrice.value = p.price; pDesc.value = p.desc; pStatus.value = p.status;
-        saveBtn.textContent = 'تحديث البيانات'; formTitle.textContent = '📝 تعديل المنتج'; window.scrollTo(0,0);
+        editId = id; 
+        document.getElementById('pName').value = p.name; 
+        document.getElementById('pPrice').value = p.price; 
+        document.getElementById('pDesc').value = p.desc; 
+        document.getElementById('pStatus').value = p.status;
+        document.getElementById('saveBtn').textContent = 'تحديث البيانات'; 
+        document.getElementById('formTitle').textContent = '📝 تعديل المنتج'; 
+        window.scrollTo(0,0);
     }
+
     function openOverlay(id) {
         document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
         document.getElementById(id).style.display = 'flex';
         if(id === 'searchMod') {
-            brandsListSearch.innerHTML = db.brands.map(b => `<button onclick="viewBrand('${b.name}')" style="background:var(--bg); border:1px solid var(--primary); color:var(--primary); padding:8px 15px; border-radius:10px; font-weight:bold; cursor:pointer">${b.name}</button>`).join('');
+            document.getElementById('brandsListSearch').innerHTML = db.brands.map(b => `<button onclick="viewBrand('${b.name}')" style="background:var(--bg); border:1px solid var(--primary); color:var(--primary); padding:8px 15px; border-radius:10px; font-weight:bold; cursor:pointer">${b.name}</button>`).join('');
         }
     }
+
     function viewBrand(name) {
         const b = db.brands.find(x => x.name === name);
         const ps = db.products.filter(p => p.brand === name);
-        searchRes.innerHTML = `<div style="padding:15px; border:2px solid var(--primary); border-radius:20px; margin-top:15px">
+        document.getElementById('searchRes').innerHTML = `<div style="padding:15px; border:2px solid var(--primary); border-radius:20px; margin-top:15px">
             <h3>${name}</h3>
             ${b.meta ? `<a href="${b.meta}" target="_blank" class="link-meta">فتح Meta</a>` : ''}
             <div style="margin-top:10px">${ps.map(p => `<div>- ${p.name}</div>`).join('')}</div>
         </div>`;
     }
+
     function closeOverlay() { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); }
     function toggleDark() { document.body.classList.toggle('dark'); }
 </script>
