@@ -124,9 +124,35 @@
 </div>
 
 <script>
+    // جلب أولي من LocalStorage لحين اكتمال تحميل الفايربيس
     let db = JSON.parse(localStorage.getItem('cm_v7_db')) || { brands: [], products: [] };
     let session = { role: '', name: '' };
     let editId = null;
+
+    // المزامنة الحية التلقائية من السحابة (Firebase) بمجرد فتح التطبيق
+    window.addEventListener('DOMContentLoaded', () => {
+        if (typeof firebase !== 'undefined') {
+            firebase.database().ref('cm_v7_db').on('value', (snapshot) => {
+                const cloudData = snapshot.val();
+                if (cloudData) {
+                    db = cloudData;
+                    if (!db.brands) db.brands = [];
+                    if (!db.products) db.products = [];
+                    // حفظ نسخة احتياطية محلياً
+                    localStorage.setItem('cm_v7_db', JSON.stringify(db));
+                    render();
+                }
+            });
+        }
+    });
+
+    // دالة الحفظ السحابي والمحلي معاً
+    function save() {
+        localStorage.setItem('cm_v7_db', JSON.stringify(db));
+        if (typeof firebase !== 'undefined') {
+            firebase.database().ref('cm_v7_db').set(db);
+        }
+    }
 
     // تفعيل إظهار حقل البراند عند كتابة باسورد 11
     passInput.oninput = () => brandNameDiv.classList.toggle('hidden', passInput.value !== '11');
@@ -172,7 +198,8 @@
     // إغلاق الدروب داون عند الضغط في أي مكان آخر
     window.onclick = (e) => {
         if (!e.target.matches('#adminBrandsBtn')) {
-            document.getElementById('brandsDropdown').style.display = 'none';
+            const dd = document.getElementById('brandsDropdown');
+            if(dd) dd.style.display = 'none';
         }
     }
 
@@ -207,6 +234,9 @@
     }
 
     function render() {
+        if (!db.brands) db.brands = [];
+        if (!db.products) db.products = [];
+
         if(session.role === 'admin') {
             selectBrandMeta.innerHTML = db.brands.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
             brandsListDel.innerHTML = db.brands.map(b => `
@@ -275,10 +305,22 @@
         saveBtn.textContent = 'تحديث البيانات'; formTitle.textContent = '📝 تعديل المنتج'; window.scrollTo(0,0);
     }
     
-</script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    // تفعيل وضع الدارك مود
+    function toggleDark() {
+        document.body.classList.toggle('dark');
+        const isDark = document.body.classList.contains('dark');
+        localStorage.setItem('dark_mode', isDark);
+    }
+    if(localStorage.getItem('dark_mode') === 'true') document.body.classList.add('dark');
 
-    <script src="l.js"></script>
+    function closeOverlay() {
+        document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
+    }
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script src="l.js"></script>
 </body>
 </html>
