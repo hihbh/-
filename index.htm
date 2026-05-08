@@ -302,7 +302,7 @@
 
             <h1>Code Mark</h1>
 
-            <p>نظام إدارة المخزون الاحترافي</p>
+            <p></p>
 
             <input type="password" id="passInput" placeholder="أدخل كلمة المرور">
 
@@ -593,20 +593,25 @@
 
             // ADMIN
 
-            if (pass === "67") {
+           if (pass === "adam#2012!") {
 
-                session = {
-                    role: "admin",
-                    name: "المدير"
-                };
+    session = {
+        role: "admin",
+        name: "المدير"
+    };
 
-                document.getElementById("adminArea").classList.remove("hidden");
-                document.getElementById("adminBrandsBtn").classList.remove("hidden");
-                document.getElementById("deleteMgrBtn").classList.remove("hidden");
-                document.getElementById("addBrandArea").classList.remove("hidden");
-                document.getElementById("brandArea").classList.remove("hidden");
+    document.getElementById("adminArea").classList.remove("hidden");
 
-            } else {
+    document.getElementById("adminBrandsBtn").classList.remove("hidden");
+
+    document.getElementById("deleteMgrBtn").classList.remove("hidden");
+
+    document.getElementById("addBrandArea").classList.remove("hidden");
+
+    // إخفاء إضافة المنتجات عن الأدمن
+    document.getElementById("brandArea").classList.add("hidden");
+}
+           else {
 
                 // BRAND LOGIN
 
@@ -615,7 +620,7 @@
                 );
 
                 if (!brand) {
-                    alert("كلمة المرور غير صحيحة");
+                     alert("كلمة المرور غير صحيحة");
                     return;
                 }
 
@@ -637,7 +642,7 @@
             document.getElementById("roleSubtitle").textContent =
                 session.role === "admin"
                     ? "لوحة المدير"
-                    : "لوحة البراند";
+                    : "";
 
             render();
         }
@@ -986,59 +991,173 @@
 
         function viewBrand(name) {
 
-            const brand = db.brands.find(b => b.name === name);
+    const brand = db.brands.find(b => b.name === name);
 
-            const products = db.products.filter(p => p.brand === name);
+    const products = db.products.filter(p => p.brand === name);
 
-            document.getElementById("searchRes").innerHTML = `
+    document.getElementById("searchRes").innerHTML = `
 
-                <div style="
-                    border:2px solid var(--primary);
-                    border-radius:20px;
-                    padding:20px;
-                ">
+        <div style="
+            border:2px solid var(--primary);
+            border-radius:20px;
+            padding:20px;
+        ">
 
-                    <h2>${name}</h2>
+            <h2>${name}</h2>
 
-                    ${brand.meta ?
+            ${brand.meta ?
 
-                    `<a href="${brand.meta}"
-                        target="_blank"
-                        class="link-meta">
+            `<a href="${brand.meta}"
+                target="_blank"
+                class="link-meta">
 
-                        فتح Meta
+                فتح Meta
 
-                    </a>`
+            </a>`
 
-                    : ""
-                }
-
-                    <p style="margin-top:15px;">
-                        عدد المنتجات: ${products.length}
-                    </p>
-
-                    ${products.map(p => `
-
-                        <div style="
-                            background:#f1f5f9;
-                            padding:12px;
-                            border-radius:12px;
-                            margin-top:10px;
-                            color:#000;
-                        ">
-
-                            <strong>${p.name}</strong>
-
-                            - ${p.price} ج.م
-
-                        </div>
-
-                    `).join("")}
-
-                </div>
-            `;
+            : ""
         }
 
+            <p style="margin-top:15px;">
+                عدد المنتجات: ${products.length}
+            </p>
+
+            <!-- SEARCH INPUT -->
+
+            <input
+                type="text"
+                id="smartSearchInput"
+                placeholder="ابحث باسم المنتج..."
+                onkeyup="smartSearchProducts('${name}')"
+                style="
+                    margin-top:20px;
+                    margin-bottom:20px;
+                "
+            >
+
+            <!-- RESULTS -->
+
+            <div id="smartProductsList">
+
+                ${products.map(p => `
+
+                    <div
+                        onclick="showProductDetails(${p.id})"
+                        style="
+                            background:#f1f5f9;
+                            padding:14px;
+                            border-radius:14px;
+                            margin-top:10px;
+                            cursor:pointer;
+                            color:#000;
+                            border:1px solid #ddd;
+                        "
+                    >
+
+                        <strong>${p.name}</strong>
+
+                    </div>
+
+                `).join("")}
+
+            </div>
+
+            <!-- DETAILS -->
+
+            <div id="productDetailsBox"></div>
+
+        </div>
+    `;
+}
+function smartSearchProducts(brandName) {
+
+    const value = document
+        .getElementById("smartSearchInput")
+        .value
+        .toLowerCase();
+
+    const products = db.products.filter(p =>
+        p.brand === brandName &&
+        p.name.toLowerCase().includes(value)
+    );
+
+    document.getElementById("smartProductsList").innerHTML =
+
+        products.map(p => `
+
+            <div
+                onclick="showProductDetails(${p.id})"
+                style="
+                    background:#f1f5f9;
+                    padding:14px;
+                    border-radius:14px;
+                    margin-top:10px;
+                    cursor:pointer;
+                    color:#000;
+                    border:1px solid #ddd;
+                "
+            >
+
+                <strong>${p.name}</strong>
+
+            </div>
+
+        `).join("");
+}
+function showProductDetails(id) {
+
+    const p = db.products.find(x => x.id === id);
+
+    if (!p) return;
+
+    document.getElementById("productDetailsBox").innerHTML = `
+
+        <div style="
+            margin-top:20px;
+            padding:20px;
+            border-radius:18px;
+            background:var(--card);
+            border:2px solid var(--primary);
+        ">
+
+            <h2>${p.name}</h2>
+
+            <div style="
+                font-size:28px;
+                font-weight:bold;
+                color:var(--primary);
+                margin:15px 0;
+            ">
+
+                ${p.price} ج.م
+
+            </div>
+
+            <div style="
+                margin-bottom:15px;
+                padding:8px 14px;
+                display:inline-block;
+                border-radius:12px;
+                color:white;
+                background:${p.status === "متوفر" ? "green" : "red"};
+            ">
+
+                ${p.status}
+
+            </div>
+
+            <p style="
+                line-height:1.8;
+                font-size:15px;
+            ">
+
+                ${p.desc || "لا يوجد وصف"}
+
+            </p>
+
+        </div>
+    `;
+}
         // OVERLAYS
 
         function openOverlay(id) {
