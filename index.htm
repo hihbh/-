@@ -1,321 +1,1156 @@
 <!DOCTYPE html>
-<html lang='ar' dir='rtl'>
+<html lang="ar" dir="rtl">
+
 <head>
-    <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Code Mark - Dashboard</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Code Mark Dashboard</title>
+
     <style>
-        :root { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --primary: #2563eb; --border: #e2e8f0; --danger: #f43f5e; --success: #10b981; --meta: #1877f2; }
-        body.dark { --bg: #020617; --card: #1e293b; --text: #f8fafc; --border: #334155; }
-        
-        * { box-sizing: border-box; transition: 0.3s; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { margin: 0; background: var(--bg); color: var(--text); direction: rtl; min-height: 100vh; }
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #0f172a;
+            --primary: #2563eb;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --success: #10b981;
+            --meta: #1877f2;
+        }
 
-        /* شاشة الدخول */
-        #loginOverlay { position: fixed; inset: 0; background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 10000; }
-        .login-box { background: white; padding: 40px; border-radius: 24px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-        
-        .container { max-width: 1200px; margin: auto; padding: 20px; display: none; }
+        body.dark {
+            --bg: #020617;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --border: #334155;
+        }
 
-        /* البار العلوي والأزرار */
-        .nav-bar { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px 25px; border-radius: 24px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border); }
-        .nav-actions { display: flex; gap: 10px; align-items: center; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", sans-serif;
+            transition: .25s;
+        }
 
-        .btn-nav { width: auto; height: 45px; padding: 0 20px; border-radius: 14px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .btn-nav:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); filter: brightness(1.1); }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
 
-        /* القائمة المنسدلة للبراندات */
-        .dropdown-container { position: relative; }
-        #brandsDropdown { position: absolute; top: 55px; right: 0; background: var(--card); border: 1px solid var(--border); border-radius: 18px; width: 300px; display: none; z-index: 500; box-shadow: 0 20px 30px rgba(0,0,0,0.15); padding: 12px; }
-        .brand-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 12px; margin-bottom: 5px; background: rgba(0,0,0,0.02); }
-        .link-meta { background: var(--meta); color: white; padding: 6px 14px; border-radius: 10px; font-size: 11px; text-decoration: none; font-weight: bold; }
-        .no-link { font-size: 10px; color: #94a3b8; }
+        button {
+            cursor: pointer;
+        }
 
-        /* الكروت والمنتجات */
-        .card { background: var(--card); padding: 25px; border-radius: 24px; border: 1px solid var(--border); margin-bottom: 25px; }
-        input, select, textarea { width: 100%; padding: 14px; margin: 8px 0; border-radius: 14px; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; }
-        
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .p-card { background: var(--card); border-radius: 24px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-        .p-header { padding: 20px; border-bottom: 1px solid var(--border); background: linear-gradient(to left, rgba(37,99,235,0.05), transparent); }
-        .p-body { padding: 20px; }
-        .p-price { font-size: 26px; font-weight: 900; color: var(--primary); margin: 10px 0; }
-        .p-tag { padding: 5px 12px; border-radius: 12px; font-size: 11px; color: white; font-weight: 800; text-transform: uppercase; }
+        .hidden {
+            display: none !important;
+        }
 
-        /* المودالات */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); }
-        .modal { background: var(--card); width: 100%; max-width: 500px; padding: 30px; border-radius: 28px; position: relative; max-height: 80vh; overflow-y: auto; }
-        
-        .hidden { display: none !important; }
+        /* LOGIN */
+
+        #loginOverlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0f172a, #1e3a8a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            padding: 35px;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .4);
+        }
+
+        .login-box h1 {
+            margin-bottom: 10px;
+            color: #1e293b;
+        }
+
+        .login-box p {
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            outline: none;
+            margin-top: 10px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .main-btn {
+            width: 100%;
+            border: none;
+            background: var(--primary);
+            color: white;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        /* APP */
+
+        .container {
+            max-width: 1250px;
+            margin: auto;
+            padding: 20px;
+            display: none;
+        }
+
+        .nav-bar {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-nav {
+            border: none;
+            color: white;
+            border-radius: 14px;
+            padding: 12px 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .p-card {
+            background: var(--card);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .p-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .p-body {
+            padding: 20px;
+        }
+
+        .p-price {
+            font-size: 28px;
+            color: var(--primary);
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .p-tag {
+            padding: 5px 12px;
+            border-radius: 12px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .actions button {
+            flex: 1;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        /* DROPDOWN */
+
+        .dropdown-container {
+            position: relative;
+        }
+
+        #brandsDropdown {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            width: 300px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 12px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, .15);
+        }
+
+        .brand-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            background: rgba(0, 0, 0, .03);
+        }
+
+        .link-meta {
+            background: var(--meta);
+            color: white;
+            padding: 7px 12px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* MODALS */
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            padding: 20px;
+        }
+
+        .modal {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card);
+            border-radius: 24px;
+            padding: 25px;
+        }
+
+        @media(max-width:700px) {
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .nav-actions {
+                justify-content: center;
+            }
+        }
     </style>
 </head>
+
 <body>
 
-<div id="loginOverlay">
-    <div class="login-box">
-        <h1 style="color: #1e293b; margin-bottom: 10px;">Code Mark</h1>
-        <p style="color: #64748b; margin-bottom: 25px;">نظام إدارة المخزون الاحترافي</p>
-        <input type="password" id="passInput" placeholder="أدخل كلمة المرور">
-        <div id="brandNameDiv" class="hidden"><input id="bNameInput" placeholder="اسم البراند الخاص بك"></div>
-        <button style="background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 14px; font-weight: bold; cursor: pointer;" onclick="handleLogin()">دخول للنظام</button>
-    </div>
-</div>
+    <!-- LOGIN -->
 
-<div class="container" id="app">
-    <div class="nav-bar">
-        <div style="display: flex; flex-direction: column;">
-            <h2 id="userHello" style="margin:0">مرحباً</h2>
-            <small id="roleSubtitle" style="color: var(--primary); font-weight: bold;"></small>
+    <div id="loginOverlay">
+
+        <div class="login-box">
+
+            <h1>Code Mark</h1>
+
+            <p>نظام إدارة المخزون الاحترافي</p>
+
+            <input type="password" id="passInput" placeholder="أدخل كلمة المرور">
+
+            <button class="main-btn" onclick="handleLogin()">
+                دخول للنظام
+            </button>
+
         </div>
-        
-        <div class="nav-actions">
-            <div class="dropdown-container">
-                <button id="adminBrandsBtn" class="btn-nav hidden" style="background: var(--success);" onclick="toggleBrandsDropdown()">🏷️ البراندات</button>
-                <div id="brandsDropdown"></div>
+
+    </div>
+
+    <!-- APP -->
+
+    <div class="container" id="app">
+
+        <div class="nav-bar">
+
+            <div>
+                <h2 id="userHello"></h2>
+                <small id="roleSubtitle"></small>
             </div>
 
-            <button id="searchBtn" class="btn-nav" style="background: var(--primary);" onclick="openOverlay('searchMod')">🔍 البحث</button>
-            <button id="deleteMgrBtn" class="btn-nav hidden" style="background: var(--danger);" onclick="openOverlay('deleteMod')">🗑️ مسح</button>
-            <button class="btn-nav" style="background: #64748b;" onclick="toggleDark()">🌓</button>
-            <button class="btn-nav" style="background: #1e293b;" onclick="location.reload()">🚪</button>
+            <div class="nav-actions">
+
+                <div class="dropdown-container">
+
+                    <button id="adminBrandsBtn"
+                        class="btn-nav hidden"
+                        style="background:var(--success);"
+                        onclick="toggleBrandsDropdown()">
+
+                        🏷️ البراندات
+
+                    </button>
+
+                    <div id="brandsDropdown"></div>
+
+                </div>
+
+                <button id="searchBtn"
+                    class="btn-nav"
+                    style="background:var(--primary);"
+                    onclick="openOverlay('searchMod')">
+
+                    🔍 البحث
+
+                </button>
+
+                <button id="deleteMgrBtn"
+                    class="btn-nav hidden"
+                    style="background:var(--danger);"
+                    onclick="openOverlay('deleteMod')">
+
+                    🗑️ حذف
+
+                </button>
+
+                <button class="btn-nav"
+                    style="background:#64748b;"
+                    onclick="toggleDark()">
+
+                    🌓 الوضع
+
+                </button>
+
+            </div>
+
         </div>
-    </div>
 
-    <div id="adminArea" class="card hidden">
-        <h3 style="margin-top:0">🔗 إدارة روابط Meta للبراندات</h3>
-        <div style="display:flex; gap:10px">
-            <select id="selectBrandMeta" style="flex:1"></select>
-            <input id="metaLinkInput" placeholder="رابط Facebook / Instagram" style="flex:2">
-            <button class="btn-nav" style="background: var(--primary); width: auto;" onclick="linkMeta()">حفظ الرابط</button>
+        <!-- ADMIN -->
+
+        <div id="adminArea" class="card hidden">
+
+            <h3>🔗 إدارة روابط Meta</h3>
+
+            <div class="grid-2">
+
+                <select id="selectBrandMeta"></select>
+
+                <input id="metaLinkInput" placeholder="رابط Meta">
+
+            </div>
+
+            <button class="main-btn" onclick="linkMeta()">
+                حفظ الرابط
+            </button>
+
         </div>
-    </div>
 
-    <div id="brandArea" class="card hidden">
-        <h3 id="formTitle" style="margin-top:0">📦 إضافة منتج جديد</h3>
-        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:15px">
-            <input id="pName" placeholder="اسم المنتج">
-            <input id="pPrice" type="number" placeholder="السعر">
+        <!-- ADD BRAND -->
+
+        <div id="addBrandArea" class="card hidden">
+
+            <h3>➕ إضافة براند</h3>
+
+            <input id="newBrandName" placeholder="اسم البراند">
+
+            <input id="newBrandPass" placeholder="الباسورد">
+
+            <button class="main-btn"
+                style="background:var(--success)"
+                onclick="addBrand()">
+
+                إضافة البراند
+
+            </button>
+
         </div>
-        <textarea id="pDesc" placeholder="اكتب تفاصيل المنتج هنا..." rows="2"></textarea>
-        <select id="pStatus"><option>متوفر</option><option>نفذ</option></select>
-        <button id="saveBtn" style="background: var(--primary); color: white; border: none; padding: 15px; border-radius: 14px; font-weight: bold; cursor: pointer; width: 100%;" onclick="saveProduct()">حفظ ونشر المنتج</button>
+
+        <!-- BRAND AREA -->
+
+        <div id="brandArea" class="card hidden">
+
+            <h3 id="formTitle">📦 إضافة منتج جديد</h3>
+
+            <div class="grid-2">
+
+                <input id="pName" placeholder="اسم المنتج">
+
+                <input id="pPrice" type="number" placeholder="السعر">
+
+            </div>
+
+            <textarea id="pDesc"
+                rows="3"
+                placeholder="وصف المنتج"></textarea>
+
+            <select id="pStatus">
+
+                <option value="متوفر">متوفر</option>
+
+                <option value="نفذ">نفذ</option>
+
+            </select>
+
+            <button id="saveBtn"
+                class="main-btn"
+                onclick="saveProduct()">
+
+                حفظ المنتج
+
+            </button>
+
+        </div>
+
+        <div class="product-grid" id="mainGrid"></div>
+
     </div>
 
-    <div class="product-grid" id="mainGrid"></div>
-</div>
+    <!-- DELETE MODAL -->
 
-<div id="deleteMod" class="overlay">
-    <div class="modal">
-        <h3>🗑️ حذف البراندات</h3>
-        <div id="brandsListDel"></div>
-        <button class="btn-nav" style="background:#eee; color:#333; width:100%; margin-top:20px" onclick="closeOverlay()">إغلاق</button>
+    <div id="deleteMod" class="overlay">
+
+        <div class="modal">
+
+            <h3 style="margin-bottom:20px;">🗑️ حذف البراندات</h3>
+
+            <div id="brandsListDel"></div>
+
+            <button class="main-btn"
+                style="background:#64748b"
+                onclick="closeOverlay()">
+
+                إغلاق
+
+            </button>
+
+        </div>
+
     </div>
-</div>
 
-<div id="searchMod" class="overlay">
-    <div class="modal">
-        <h3>🔍 البحث عن براند</h3>
-        <div id="brandsListSearch" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px"></div>
-        <div id="searchRes"></div>
-        <button class="btn-nav" style="background:#eee; color:#333; width:100%; margin-top:20px" onclick="closeOverlay()">إغلاق</button>
+    <!-- SEARCH MODAL -->
+
+    <div id="searchMod" class="overlay">
+
+        <div class="modal">
+
+            <h3 style="margin-bottom:20px;">🔍 البحث عن براند</h3>
+
+            <div id="brandsListSearch"
+                style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px;"></div>
+
+            <div id="searchRes"></div>
+
+            <button class="main-btn"
+                style="background:#64748b"
+                onclick="closeOverlay()">
+
+                إغلاق
+
+            </button>
+
+        </div>
+
     </div>
-</div>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script src="l.js"></script>
+    <!-- FIREBASE -->
 
-<script>
-    let db = JSON.parse(localStorage.getItem('cm_v7_db')) || { brands: [], products: [] };
-    let session = { role: '', name: '' };
-    let editId = null;
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 
-    // تشغيل المزامنة فور تحميل الصفحة لضمان استلام البيانات قبل الدخول حتى
-    window.onload = startSync;
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-    function startSync() {
-        if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
-            firebase.database().ref('cm_v7_db').on('value', (snapshot) => {
-                const cloudData = snapshot.val();
-                if (cloudData) {
-                    db = cloudData;
-                    if (!db.brands) db.brands = [];
-                    if (!db.products) db.products = [];
-                    localStorage.setItem('cm_v7_db', JSON.stringify(db));
-                    // التحديث فقط إذا كان المستخدم تجاوز شاشة الدخول
-                    if (document.getElementById('app').style.display === 'block') {
-                        render();
-                    }
-                }
-            });
-        }
-    }
+    <script>
 
-    function save() {
-        localStorage.setItem('cm_v7_db', JSON.stringify(db));
-        if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
-            firebase.database().ref('cm_v7_db').set(db);
-        }
-    }
+        // FIREBASE CONFIG
 
-    passInput.oninput = () => brandNameDiv.classList.toggle('hidden', passInput.value !== '11');
+        const firebaseConfig = {
 
-    function handleLogin() {
-        const pass = passInput.value;
-        if (pass === '11') {
-            const name = bNameInput.value;
-            if(!name) return alert('يرجى كتابة اسم البراند');
-            session = { role: 'brand', name: name };
-            if(!db.brands.find(b => b.name === name)) { 
-                db.brands.push({name, meta: ''}); 
-                save(); 
-            }
-            brandArea.classList.remove('hidden');
-        } else if (pass === '67') {
-            session = { role: 'admin', name: 'المدير' };
-            adminArea.classList.remove('hidden');
-            adminBrandsBtn.classList.remove('hidden');
-            deleteMgrBtn.classList.remove('hidden');
-        } else return alert('كلمة مرور خاطئة');
+            apiKey: "AIzaSyDLmbxZEKj5Mc7fV3qNyuJsX39o6vBXdnY",
 
-        loginOverlay.style.display = 'none';
-        app.style.display = 'block';
-        userHello.textContent = `مرحباً، ${session.name}`;
-        roleSubtitle.textContent = session.role === 'admin' ? 'لوحة تحكم المدير' : 'لوحة إدارة المنتجات';
-        
-        // ريندر فوري بعد الدخول لعرض البيانات المحملة
-        render();
-    }
+            authDomain: "code-m-75a2f.firebaseapp.com",
 
-    function saveProduct() {
-        const pNameInput = document.getElementById('pName');
-        const pPriceInput = document.getElementById('pPrice');
-        const pDescInput = document.getElementById('pDesc');
-        const pStatusInput = document.getElementById('pStatus');
+            databaseURL: "https://code-m-75a2f-default-rtdb.firebaseio.com",
 
-        if(!pNameInput.value || !pPriceInput.value) return alert('يرجى ملء الاسم والسعر');
+            projectId: "code-m-75a2f",
 
-        const p = {
-            id: editId || Date.now(),
-            brand: session.name,
-            name: pNameInput.value,
-            price: pPriceInput.value,
-            desc: pDescInput.value,
-            status: pStatusInput.value
+            storageBucket: "code-m-75a2f.firebasestorage.app",
+
+            messagingSenderId: "879215924225",
+
+            appId: "1:879215924225:web:d6349ec939a48c4652dc00"
+
         };
 
-        if(editId) {
-            const i = db.products.findIndex(x => x.id === editId);
-            if(i !== -1) db.products[i] = p;
-            editId = null;
-        } else { 
-            db.products.push(p); 
-        }
-        
-        save(); 
-        resetForm(); 
-        render();
-        alert('تم الحفظ بنجاح');
+        firebase.initializeApp(firebaseConfig);
+
+        const database = firebase.database();
+
+        // DATABASE
+
+        let db = {
+            brands: [],
+            products: []
+        };
+
+        let session = {
+            role: '',
+            name: ''
+        };
+
+        let editId = null;
+
+        // LOAD DATA
+
+        database.ref("cm_v7_db").on("value", (snapshot) => {
+
+    if (snapshot.exists()) {
+
+        db = snapshot.val();
+
+        // حماية لو البيانات ناقصة
+
+        if (!db.brands) db.brands = [];
+
+        if (!db.products) db.products = [];
+
+    } else {
+
+        db = {
+
+            brands: [],
+
+            products: []
+        };
+
+        save();
     }
 
-    function resetForm() {
-        document.getElementById('pName').value = '';
-        document.getElementById('pPrice').value = '';
-        document.getElementById('pDesc').value = '';
-        document.getElementById('saveBtn').textContent = 'حفظ ونشر المنتج';
-        document.getElementById('formTitle').textContent = '📦 إضافة منتج جديد';
-    }
+    render();
+});
 
-    function render() {
-        if(session.role === 'admin') {
-            document.getElementById('selectBrandMeta').innerHTML = db.brands.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
-            document.getElementById('brandsListDel').innerHTML = db.brands.map(b => `
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(0,0,0,0.02); border-radius:12px; margin-bottom:8px;">
-                    <strong>${b.name}</strong>
-                    <button onclick="deleteBrand('${b.name}')" style="background:var(--danger); color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;">مسح X</button>
-                </div>
-            `).join('');
+        // SAVE
+
+        function save() {
+            database.ref("cm_v7_db").set(db);
         }
 
-        const grid = document.getElementById('mainGrid');
-        let list = (session.role === 'brand') ? db.products.filter(p => p.brand === session.name) : db.products;
-        
-        grid.innerHTML = list.slice().reverse().map(p => `
-            <div class="p-card">
-                <div class="p-header">
-                    <div style="display:flex; justify-content:space-between; align-items:start">
-                        <span class="p-tag" style="background:${p.status === 'متوفر' ? 'var(--success)' : 'var(--danger)'}">${p.status}</span>
-                        <span style="font-size:11px; color:var(--primary); font-weight:bold">${p.brand}</span>
+        // LOGIN
+
+        function handleLogin() {
+
+            const pass = document.getElementById("passInput").value.trim();
+
+            if (!pass) {
+                alert("اكتب كلمة المرور");
+                return;
+            }
+
+            // ADMIN
+
+            if (pass === "67") {
+
+                session = {
+                    role: "admin",
+                    name: "المدير"
+                };
+
+                document.getElementById("adminArea").classList.remove("hidden");
+                document.getElementById("adminBrandsBtn").classList.remove("hidden");
+                document.getElementById("deleteMgrBtn").classList.remove("hidden");
+                document.getElementById("addBrandArea").classList.remove("hidden");
+                document.getElementById("brandArea").classList.remove("hidden");
+
+            } else {
+
+                // BRAND LOGIN
+
+                const brand = db.brands.find(
+                    b => String(b.password) === String(pass)
+                );
+
+                if (!brand) {
+                    alert("كلمة المرور غير صحيحة");
+                    return;
+                }
+
+                session = {
+                    role: "brand",
+                    name: brand.name
+                };
+
+                document.getElementById("brandArea").classList.remove("hidden");
+                document.getElementById("searchBtn").classList.add("hidden");
+            }
+
+            document.getElementById("loginOverlay").style.display = "none";
+            document.getElementById("app").style.display = "block";
+
+            document.getElementById("userHello").textContent =
+                `مرحباً، ${session.name}`;
+
+            document.getElementById("roleSubtitle").textContent =
+                session.role === "admin"
+                    ? "لوحة المدير"
+                    : "لوحة البراند";
+
+            render();
+        }
+
+        // ADD BRAND
+
+        function addBrand() {
+
+            const name = document.getElementById("newBrandName").value.trim();
+            const password = document.getElementById("newBrandPass").value.trim();
+
+            if (!name || !password) {
+                alert("اكتب كل البيانات");
+                return;
+            }
+
+            const exists = db.brands.find(b => b.name === name);
+
+            if (exists) {
+                alert("البراند موجود بالفعل");
+                return;
+            }
+
+            db.brands.push({
+                name,
+                password,
+                meta: ""
+            });
+
+            save();
+
+            document.getElementById("newBrandName").value = "";
+            document.getElementById("newBrandPass").value = "";
+
+            alert("تم إضافة البراند");
+        }
+
+        // LINK META
+
+        function linkMeta() {
+
+            const selected = document.getElementById("selectBrandMeta").value;
+
+            const link = document.getElementById("metaLinkInput").value.trim();
+
+            const brand = db.brands.find(b => b.name === selected);
+
+            if (!brand) return;
+
+            brand.meta = link;
+
+            save();
+
+            alert("تم حفظ الرابط");
+        }
+
+        // SAVE PRODUCT
+
+      function saveProduct() {
+
+    if (!session.name) {
+
+        alert("سجل دخول الأول");
+
+        return;
+    }
+
+    const name = document.getElementById("pName").value.trim();
+
+    const price = document.getElementById("pPrice").value.trim();
+
+    const desc = document.getElementById("pDesc").value.trim();
+
+    const status = document.getElementById("pStatus").value;
+
+    if (!name || !price) {
+
+        alert("اكتب الاسم والسعر");
+
+        return;
+    }
+
+    // تأكد إن المنتجات Array
+    if (!Array.isArray(db.products)) {
+
+        db.products = [];
+    }
+
+    const product = {
+
+        id: editId || Date.now(),
+
+        brand: session.name,
+
+        name: name,
+
+        price: price,
+
+        desc: desc,
+
+        status: status
+    };
+
+    // تعديل منتج
+
+    if (editId) {
+
+        const index = db.products.findIndex(
+            p => p.id === editId
+        );
+
+        if (index !== -1) {
+
+            db.products[index] = product;
+        }
+
+        editId = null;
+
+    }
+
+    // إضافة منتج جديد
+
+    else {
+
+        db.products.push(product);
+    }
+
+    // حفظ Firebase
+
+    save();
+
+    // تحديث الواجهة
+
+    resetForm();
+
+    render();
+
+    alert("تم حفظ المنتج بنجاح");
+}
+
+        // RESET
+
+        function resetForm() {
+
+            document.getElementById("pName").value = "";
+
+            document.getElementById("pPrice").value = "";
+
+            document.getElementById("pDesc").value = "";
+
+            document.getElementById("pStatus").value = "متوفر";
+
+            document.getElementById("saveBtn").textContent = "حفظ المنتج";
+
+            document.getElementById("formTitle").textContent =
+                "📦 إضافة منتج جديد";
+        }
+
+        // EDIT
+
+        function startEdit(id) {
+
+            const p = db.products.find(x => x.id === id);
+
+            if (!p) return;
+
+            editId = id;
+
+            document.getElementById("pName").value = p.name;
+
+            document.getElementById("pPrice").value = p.price;
+
+            document.getElementById("pDesc").value = p.desc;
+
+            document.getElementById("pStatus").value = p.status;
+
+            document.getElementById("saveBtn").textContent = "تحديث المنتج";
+
+            document.getElementById("formTitle").textContent =
+                "📝 تعديل المنتج";
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        }
+
+        // DELETE PRODUCT
+
+        function delP(id) {
+
+            if (!confirm("هل تريد حذف المنتج؟")) return;
+
+            db.products = db.products.filter(x => x.id !== id);
+
+            save();
+        }
+
+        // DELETE BRAND
+
+        function deleteBrand(name) {
+
+            if (!confirm(`هل تريد حذف ${name} ؟`)) return;
+
+            db.brands = db.brands.filter(b => b.name !== name);
+
+            db.products = db.products.filter(p => p.brand !== name);
+
+            save();
+
+            render();
+        }
+
+        // RENDER
+
+        function render() {
+
+            // ADMIN LISTS
+
+            if (session.role === "admin") {
+
+                document.getElementById("selectBrandMeta").innerHTML =
+
+                    db.brands.map(b =>
+
+                        `<option value="${b.name}">${b.name}</option>`
+
+                    ).join("");
+
+                document.getElementById("brandsListDel").innerHTML =
+
+                    db.brands.map(b => `
+
+                        <div class="brand-item">
+
+                            <strong>${b.name}</strong>
+
+                            <button
+                                onclick="deleteBrand('${b.name}')"
+                                style="
+                                    border:none;
+                                    background:var(--danger);
+                                    color:white;
+                                    padding:8px 12px;
+                                    border-radius:10px;
+                                    font-weight:bold;
+                                ">
+
+                                حذف
+
+                            </button>
+
+                        </div>
+
+                    `).join("");
+            }
+
+            const grid = document.getElementById("mainGrid");
+
+            let products = session.role === "brand"
+
+                ? db.products.filter(p => p.brand === session.name)
+
+                : db.products;
+
+            if (!products.length) {
+
+                grid.innerHTML = `
+                    <div class="card">
+                        لا توجد منتجات حالياً
                     </div>
-                    <h3 style="margin:12px 0 0 0; font-size:18px;">${p.name}</h3>
-                </div>
-                <div class="p-body">
-                    <div class="p-price">${p.price} ج.م</div>
-                    <p style="font-size:13px; opacity:0.7; margin:10px 0; min-height:40px;">${p.desc}</p>
-                    <div style="display:flex; gap:8px; margin-top:15px; border-top:1px solid var(--border); padding-top:15px">
-                        <button onclick="startEdit(${p.id})" style="flex:1; background:var(--success); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer; font-weight:bold">تعديل</button>
-                        <button onclick="delP(${p.id})" style="flex:1; background:var(--danger); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer; font-weight:bold">حذف</button>
+                `;
+
+                return;
+            }
+
+            grid.innerHTML =
+
+                products.slice().reverse().map(p => `
+
+                    <div class="p-card">
+
+                        <div class="p-header">
+
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+
+                                <span class="p-tag"
+                                    style="background:${p.status === "متوفر" ? "green" : "red"}">
+
+                                    ${p.status}
+
+                                </span>
+
+                                <span style="font-size:13px; color:var(--primary); font-weight:bold;">
+
+                                    ${p.brand}
+
+                                </span>
+
+                            </div>
+
+                            <h3 style="margin-top:15px;">
+                                ${p.name}
+                            </h3>
+
+                        </div>
+
+                        <div class="p-body">
+
+                            <div class="p-price">
+                                ${p.price} ج.م
+                            </div>
+
+                            <p>
+                                ${p.desc || "لا يوجد وصف"}
+                            </p>
+
+                            <div class="actions">
+
+                                <button
+                                    onclick="startEdit(${p.id})"
+                                    style="background:var(--success)">
+
+                                    تعديل
+
+                                </button>
+
+                                <button
+                                    onclick="delP(${p.id})"
+                                    style="background:var(--danger)">
+
+                                    حذف
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
                     </div>
-                </div>
-            </div>
-        `).join('');
-    }
 
-    function toggleBrandsDropdown() {
-        const dd = document.getElementById('brandsDropdown');
-        const isVisible = dd.style.display === 'block';
-        dd.style.display = isVisible ? 'none' : 'block';
-        if(!isVisible) {
-            dd.innerHTML = db.brands.length ? db.brands.map(b => `
-                <div class="brand-item">
-                    <strong>${b.name}</strong>
-                    ${b.meta ? `<a href="${b.meta}" target="_blank" class="link-meta">Meta</a>` : `<span class="no-link">لا يوجد لينك</span>`}
-                </div>
-            `).join('') : '<p style="text-align:center; font-size:12px; color:#999;">لا توجد براندات</p>';
+                `).join("");
         }
-    }
 
-    function linkMeta() {
-        const b = db.brands.find(x => x.name === document.getElementById('selectBrandMeta').value);
-        if(b) b.meta = document.getElementById('metaLinkInput').value;
-        save(); render(); alert('تم الحفظ');
-    }
+        // SEARCH BRAND
 
-    function deleteBrand(name) { if(confirm(`مسح ${name}؟`)) { db.brands = db.brands.filter(b => b.name !== name); db.products = db.products.filter(p => p.brand !== name); save(); render(); } }
-    function delP(id) { if(confirm('حذف المنتج؟')) { db.products = db.products.filter(x => x.id !== id); save(); render(); } }
-    
-    function startEdit(id) {
-        const p = db.products.find(x => x.id === id);
-        editId = id; 
-        document.getElementById('pName').value = p.name; 
-        document.getElementById('pPrice').value = p.price; 
-        document.getElementById('pDesc').value = p.desc; 
-        document.getElementById('pStatus').value = p.status;
-        document.getElementById('saveBtn').textContent = 'تحديث البيانات'; 
-        document.getElementById('formTitle').textContent = '📝 تعديل المنتج'; 
-        window.scrollTo(0,0);
-    }
+        function viewBrand(name) {
 
-    function openOverlay(id) {
-        document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
-        document.getElementById(id).style.display = 'flex';
-        if(id === 'searchMod') {
-            document.getElementById('brandsListSearch').innerHTML = db.brands.map(b => `<button onclick="viewBrand('${b.name}')" style="background:var(--bg); border:1px solid var(--primary); color:var(--primary); padding:8px 15px; border-radius:10px; font-weight:bold; cursor:pointer">${b.name}</button>`).join('');
+            const brand = db.brands.find(b => b.name === name);
+
+            const products = db.products.filter(p => p.brand === name);
+
+            document.getElementById("searchRes").innerHTML = `
+
+                <div style="
+                    border:2px solid var(--primary);
+                    border-radius:20px;
+                    padding:20px;
+                ">
+
+                    <h2>${name}</h2>
+
+                    ${brand.meta ?
+
+                    `<a href="${brand.meta}"
+                        target="_blank"
+                        class="link-meta">
+
+                        فتح Meta
+
+                    </a>`
+
+                    : ""
+                }
+
+                    <p style="margin-top:15px;">
+                        عدد المنتجات: ${products.length}
+                    </p>
+
+                    ${products.map(p => `
+
+                        <div style="
+                            background:#f1f5f9;
+                            padding:12px;
+                            border-radius:12px;
+                            margin-top:10px;
+                            color:#000;
+                        ">
+
+                            <strong>${p.name}</strong>
+
+                            - ${p.price} ج.م
+
+                        </div>
+
+                    `).join("")}
+
+                </div>
+            `;
         }
-    }
 
-    function viewBrand(name) {
-        const b = db.brands.find(x => x.name === name);
-        const ps = db.products.filter(p => p.brand === name);
-        document.getElementById('searchRes').innerHTML = `<div style="padding:15px; border:2px solid var(--primary); border-radius:20px; margin-top:15px">
-            <h3>${name}</h3>
-            ${b.meta ? `<a href="${b.meta}" target="_blank" class="link-meta">فتح Meta</a>` : ''}
-            <div style="margin-top:10px">${ps.map(p => `<div>- ${p.name}</div>`).join('')}</div>
-        </div>`;
-    }
+        // OVERLAYS
 
-    function closeOverlay() { document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none'); }
-    function toggleDark() { document.body.classList.toggle('dark'); }
-</script>
+        function openOverlay(id) {
+
+            closeOverlay();
+
+            document.getElementById(id).style.display = "flex";
+
+            if (id === "searchMod") {
+
+                document.getElementById("brandsListSearch").innerHTML =
+
+                    db.brands.map(b => `
+
+                        <button
+                            onclick="viewBrand('${b.name}')"
+                            style="
+                                border:1px solid var(--primary);
+                                background:white;
+                                color:var(--primary);
+                                padding:10px 14px;
+                                border-radius:10px;
+                                font-weight:bold;
+                            ">
+
+                            ${b.name}
+
+                        </button>
+
+                    `).join("");
+            }
+        }
+
+        function closeOverlay() {
+
+            document.querySelectorAll(".overlay")
+                .forEach(o => o.style.display = "none");
+        }
+
+        // DARK MODE
+
+        function toggleDark() {
+
+            document.body.classList.toggle("dark");
+        }
+
+        // DROPDOWN
+
+        function toggleBrandsDropdown() {
+
+            const dd = document.getElementById("brandsDropdown");
+
+            const visible = dd.style.display === "block";
+
+            dd.style.display = visible ? "none" : "block";
+
+            if (!visible) {
+
+                dd.innerHTML = db.brands.map(b => `
+
+                    <div class="brand-item">
+
+                        <strong>${b.name}</strong>
+
+                        ${b.meta ?
+
+                        `<a href="${b.meta}"
+                            target="_blank"
+                            class="link-meta">
+
+                            Meta
+
+                        </a>`
+
+                        : ""
+                    }
+
+                    </div>
+
+                `).join("");
+            }
+        }
+
+        // CLOSE DROPDOWN
+
+        window.addEventListener("click", function (e) {
+
+            const btn = document.getElementById("adminBrandsBtn");
+
+            const dd = document.getElementById("brandsDropdown");
+
+            if (
+                !btn.contains(e.target) &&
+                !dd.contains(e.target)
+            ) {
+
+                dd.style.display = "none";
+            }
+        });
+
+        // ENTER LOGIN
+
+        document.getElementById("passInput")
+            .addEventListener("keypress", function (e) {
+
+                if (e.key === "Enter") {
+                    handleLogin();
+                }
+            });
+
+    </script>
+
 </body>
+
 </html>
